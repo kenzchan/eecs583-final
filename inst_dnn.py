@@ -40,7 +40,7 @@ if __name__ == '__main__':
 	
 	net = Net()
 
-	val_data = torch.from_numpy(np.load('train_data.npy')[600:680]).float()
+	val_data = torch.from_numpy(np.load('inst.npy')[600:680]).float()
 	val_flag = torch.from_numpy(np.load('train_flag.npy')[600:680]).float()
 	criterion = nn.MSELoss()
 	optimizer = optim.Adam(net.parameters(), lr=1e-4)
