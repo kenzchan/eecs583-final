@@ -21,9 +21,8 @@ class Net(nn.Module):
 		self.rnn2 = nn.LSTM(64, 64)
 		self.bn = nn.BatchNorm1d(64)
 		# self.f = nn.Flatten(0, -1)
-		self.fc1 = nn.Linear(2048, 32)
-		self.fc2 = nn.Linear(38, 1)
-		self.fc3 = nn.Sigmoid()
+		self.fc1 = nn.Linear(2048, 1)
+		self.fc2 = nn.Sigmoid()
 	def forward(self, x):
 		# x = x.float()
 		# x = self.fc1(x).float()
@@ -36,12 +35,11 @@ class Net(nn.Module):
 		x = x[-1]
 		x = self.bn(x)
 		x = torch.reshape(x, (32,2048))
+		x = torch.concat((x,tmp), 0)
 		x = self.fc1(x)
-		x = torch.cat((x,tmp.float()), 1)
-		# print(x.shape)
 		# print(x.shape)
 		x = self.fc2(x)
-		x = self.fc3(x)
+
 		return x
 
 class customDataset(Dataset):
@@ -64,15 +62,10 @@ if __name__ == '__main__':
 	
 	net = Net().cpu()
 
-	val_data1 = np.load('case_a_input.npy')[192:224]
-	val_data2 = np.load('case_a_inst.npy')[192:224]
-	val_data = np.zeros((32,1030))
-	for i in range(32):
-			val_data[i] = np.append(val_data1[i], val_data2[i])
-	val_data = torch.LongTensor(val_data)
+	val_data = torch.LongTensor(np.load('case_a_input.npy')[192:224])
 	val_flag = torch.from_numpy(np.load('case_a_output.npy')[192:224]).float()
 	criterion = nn.MSELoss()
-	optimizer = optim.Adam(net.parameters(), lr=1e-3)
+	optimizer = optim.Adam(net.parameters(), lr=1e-4)
 	train_set = customDataset()
 	train_loader = DataLoader(
 	dataset=train_set, batch_size=32, shuffle=True)

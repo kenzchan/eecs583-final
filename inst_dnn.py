@@ -12,21 +12,20 @@ from torch.utils.data.dataset import Dataset
 class Net(nn.Module):
 	def __init__(self):
 		super(Net, self).__init__()
-		self.fc1 = nn.Linear(128, 32)
-		self.fc2 = nn.Linear(32, 8)
-		self.fc3 = nn.Linear(8, 1)
+		self.fc1 = nn.Linear(6, 3)
+		self.fc2 = nn.Linear(3, 1)
+		self.fc3 = nn.Linear(1, 1)
 		self.fc4 = nn.Sigmoid()
 	def forward(self, x):
 		x = x.float()
 		x = self.fc1(x).float()
-		x = self.fc2(x).float()
+		x = self.fc2(x)
 		x = self.fc3(x)
-		x = self.fc4(x)
 		return x
 
 class customDataset(Dataset):
 	def __init__(self):
-		x = np.load('train_data.npy')
+		x = np.load('inst.npy')
 		y = np.load('train_flag.npy')
 		self.x = x[:600]
 		self.y = y[:600]
@@ -42,12 +41,12 @@ if __name__ == '__main__':
 
 	val_data = torch.from_numpy(np.load('inst.npy')[600:680]).float()
 	val_flag = torch.from_numpy(np.load('train_flag.npy')[600:680]).float()
-	criterion = nn.MSELoss()
+	criterion = nn.L1Loss()
 	optimizer = optim.Adam(net.parameters(), lr=1e-4)
 	train_set = customDataset()
 	train_loader = DataLoader(
 	dataset=train_set, batch_size=32, shuffle=True)
-	for epoch in range(100):  # loop over the dataset multiple times
+	for epoch in range(200):  # loop over the dataset multiple times
 
 		running_loss = 0.0
 		for inputs, labels in train_loader:
@@ -70,8 +69,7 @@ if __name__ == '__main__':
 			if torch.round(val_output[i]) == val_flag[i]:
 				cnt += 1
 		print('[%d] loss: %.3f' %
-			(epoch + 1, running_loss / 680))
-		print('val loss: ' + str(cnt/80))
+			(epoch + 1, running_loss / 680), 'val loss: ' + str(cnt/80))
 
 	print('Finished Training')
 
